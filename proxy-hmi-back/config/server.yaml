@@ -1,0 +1,7 @@
+default:
+  amqp:
+    host: debianvm
+    port: 5672
+    exchange: 
+      name: mars
+      type: topic
