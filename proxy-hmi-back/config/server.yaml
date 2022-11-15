@@ -1,6 +1,6 @@
 default:
   amqp:
-    host: debianvm
+    host: localhost
     port: 5672
     exchange: 
       name: mars

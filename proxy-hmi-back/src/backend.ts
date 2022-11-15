@@ -5,7 +5,6 @@ import {AMQPClient} from '@server/amqp';
 import assert from 'node:assert';
 import Logger from '@common/logger';
 import {RequestMessage} from '@server/client';
-import { request } from 'node:http';
 
 let amqpClient:AMQPClient;
 const CONFIG_DIR = process.cwd() + '/config';
@@ -24,6 +23,7 @@ loadAsync(CONFIG_DIR+'/server.yaml')
       assert(HTTP_HOST && HTTP_PORT, "MISSING HOST AND PORT")
 
       const server = express();
+      initAMQPClient(config.amqp);
 
       server.use(express.json());
       server.use('/', logRequest, sendAmqpRequest);
@@ -50,7 +50,7 @@ function logRequest(request:Request,
   response:Response,
   next:()=>void) {
     LOGGER.info('Message on path :'+ request.baseUrl + request.path);
-    LOGGER.info('Body: '+JSON.stringify(request.body));
+    LOGGER.info('Body: '+ JSON.stringify(request.body));
     LOGGER.info('Query : '+ request.query);
     next();
 }
