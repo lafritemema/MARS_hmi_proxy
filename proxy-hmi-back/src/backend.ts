@@ -51,7 +51,8 @@ function logRequest(request:Request,
   next:()=>void) {
     LOGGER.info('Message on path :'+ request.baseUrl + request.path);
     LOGGER.info('Body: '+ JSON.stringify(request.body));
-    LOGGER.info('Query : '+ request.query);
+    LOGGER.info('Query : '+ JSON.stringify(request.query));
+    LOGGER.info('Headers :'+ JSON.stringify(request.headers))
     next();
 }
 
@@ -63,13 +64,22 @@ async function sendAmqpRequest(request:Request,
     method: request.method.toUpperCase(),
     ... request.query
   }
+
+  const headers = request.headers;
   const body = <MessageBody> request.body
 
   console.log(query);
 
-  const reqMessage = new RequestMessage(query, body)
+  let reqMessage = new RequestMessage(query, body)
       .setHeader('from', 'hmi-proxy');
 
+  if(request.method.toUpperCase()==='SUBSCRIBE') {
+    console.log('add reportEndpoint info')
+    reqMessage
+      .setHeader('report_endpoint', <string>headers.reportendpoint)
+  }
+
+  console.log(reqMessage.describe());
   const responseMessage = await amqpClient.request(REQUEST_TOPIC, reqMessage, RESPONSE_TOPIC)
 
   response.send(responseMessage.body);
